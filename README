@@ -1,0 +1,22 @@
+DBIx::TmpDB version 0.01
+========================
+
+Temporary database runner
+
+INSTALLATION
+
+  perl Makefile.PL
+  make
+  make test
+  make install
+
+AUTHOR
+
+Alexander Lebedev <x-ander@alexplus.ru>
+
+COPYRIGHT AND LICENSE
+
+Copyright (C) 2016 by Alexandra Plus Ltd.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.

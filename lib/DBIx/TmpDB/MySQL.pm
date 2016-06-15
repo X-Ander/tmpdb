@@ -3,6 +3,8 @@ package DBIx::TmpDB::MySQL;
 use strict;
 use warnings;
 
+use 5.010;
+
 use Carp;
 use File::Temp qw/tempdir/;
 use DBI;
