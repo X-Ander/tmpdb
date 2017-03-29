@@ -6,9 +6,14 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
-use DBIx::TmpDB qw/tmpdb_new/;
+use DBIx::TmpDB qw/tmpdb_backends tmpdb_new/;
 
 my $backend = shift;
+
+if ($backend eq '--list') {
+	print join("\n", tmpdb_backends), "\n";
+	exit 0;
+}
 
 die "No backend specified\n" unless $backend;
 

@@ -4,6 +4,10 @@ MANIFEST
 README
 bin/tmpdb
 t/tmpdb.t
+t/util.t
 t/mysql.t
+t/sqlite.t
 lib/DBIx/TmpDB.pm
-lib/DBIx/TmpDB/MySQL.pm
+lib/DBIx/TmpDB/Util.pm
+lib/DBIx/TmpDB/Backend/MySQL.pm
+lib/DBIx/TmpDB/Backend/SQLite.pm

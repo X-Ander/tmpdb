@@ -10,7 +10,9 @@ use Exporter 'import';
 our @EXPORT_OK = qw/tmpdb_backends tmpdb_new/;
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
+
+my $backend_pkg_root = __PACKAGE__ . "::Backend";
 
 sub _find_pms { my ($dir) = @_;
 	opendir my $dh, $dir or return ();
@@ -22,13 +24,13 @@ sub _find_pms { my ($dir) = @_;
 }
 
 sub _can_run { my ($backend) = @_;
-	my $pkg = __PACKAGE__ . "::$backend";
+	my $pkg = $backend_pkg_root . "::$backend";
 	eval "require $pkg";
 	return $@ ? 0 : eval $pkg . "::can_run";
 }
 
 sub tmpdb_backends {
-	my $pkg_dir = __PACKAGE__;
+	my $pkg_dir = $backend_pkg_root;
 	$pkg_dir =~ s{::}{/}g;
 
 	my %pm_hash = map {
@@ -46,7 +48,7 @@ sub tmpdb_backends {
 }
 
 sub tmpdb_new { my ($backend) = @_;
-	my $pkg = __PACKAGE__ . "::$backend";
+	my $pkg = $backend_pkg_root . "::$backend";
 	eval "require $pkg";
 	return $@ ? undef : eval $pkg . "->new";
 }
@@ -85,7 +87,7 @@ DBIx::TmpDB - Temporary database runner
 This module creates and destroys temporary databases. It runs, if nessesary,
 temporary instanses of the database servers.
 
-Only MySQL is supported now. You are welcome to add more backends.
+MySQL and SQLite are supported now. You are welcome to add more backends.
 
 =over
 

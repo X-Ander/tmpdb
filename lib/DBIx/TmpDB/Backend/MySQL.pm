@@ -1,4 +1,4 @@
-package DBIx::TmpDB::MySQL;
+package DBIx::TmpDB::Backend::MySQL;
 
 use strict;
 use warnings;
@@ -9,25 +9,17 @@ use Carp;
 use File::Temp qw/tempdir/;
 use DBI;
 
-sub _find_program { my ($prog) = @_;
-	my @paths = (split(qr/:/, ($ENV{PATH} // '')),
-		'/usr/local/sbin', '/usr/sbin', '/sbin');
-	for my $path (@paths) {
-		my $full_path = $path . '/' . $prog;
-		return $full_path if -f $full_path && -x $full_path;
-	}
-	return undef;
-}
+use DBIx::TmpDB::Util qw/find_program/;
 
 sub can_run {
 	for my $prog (qw/mysqld mysql_install_db/) {
-		return 0 unless _find_program($prog);
+		return 0 unless find_program($prog);
 	}
 	return 1;
 }
 
 sub client_program { my ($self) = @_;
-	my $prog = _find_program('mysql');
+	my $prog = find_program('mysql');
 	return $prog ?
 		( $prog
 		, '--no-defaults'
@@ -42,7 +34,7 @@ sub new { my ($class) = @_;
 	my $self = bless {}, $class;
 
 	for my $prog (qw/mysqld mysql_install_db/) {
-		$self->{$prog} = _find_program($prog)
+		$self->{$prog} = find_program($prog)
 			or croak "Can't find '$prog' executable";
 	}
 

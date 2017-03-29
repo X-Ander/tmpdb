@@ -1,5 +1,9 @@
 Revision history for Perl extension DBIx::TmpDB.
 
+0.02  Fri Sep 30 14:00:00 2016
+	- added the SQLite backend
+	- added '--list' option to the command-line utility 'tmpdb'
+
 0.01  Wed Jun 15 09:30:11 2016
 	- original version; created by h2xs 1.23 with options
 		-AX --skip-exporter --use-new-tests -n DBIx::TmpDB
