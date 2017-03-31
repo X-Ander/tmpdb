@@ -3,6 +3,11 @@ DBIx::TmpDB version 0.01
 
 Temporary database runner
 
+This software is intended to use in unit tests mostly. It creates different
+temporary databases and automatically destroys them afterwards.
+
+MySQL and SQLite are supported now. You are welcome to add more backends.
+
 INSTALLATION
 
   perl Makefile.PL
@@ -10,13 +15,28 @@ INSTALLATION
   make test
   make install
 
+USAGE
+
+You can run the tmpdb command line utility, or you can use the DBIx::TmpDB
+package in your Perl program.
+
+See the POD documentation in the corresponding files.
+
+BUGS
+
+There are no known bugs in the program but may be unknown yet. Let me know
+if you found some of them.
+
+My English is poor so the documentation leaves much to be desired. If you
+can help to improve it don't hesitate to contact me.
+
 AUTHOR
 
 Alexander Lebedev <x-ander@alexplus.ru>
 
 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016 by Alexandra Plus Ltd.
+Copyright (C) 2016, 2017 by Alexandra Plus Ltd.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

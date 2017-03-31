@@ -6,24 +6,105 @@ use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+use Getopt::Long;
+
 use DBIx::TmpDB qw/tmpdb_backends tmpdb_new/;
 
-my $backend = shift;
+my $list;
+my $persist;
+my $verbose;
+my $client;
 
-if ($backend eq '--list') {
+GetOptions
+	( '--list'    => \$list
+	, '--persist' => \$persist
+	, '--verbose' => \$verbose
+	, '--client'  => \$client
+	);
+
+if ($list) {
 	print join("\n", tmpdb_backends), "\n";
 	exit 0;
 }
 
+my $backend = shift;
+
 die "No backend specified\n" unless $backend;
 
-print "Creating temporary $backend server...\n";
+print "Creating temporary $backend database...\n" if $verbose;
 
-my $db = tmpdb_new($backend) or die "Can't create $backend server\n";
+my $db = tmpdb_new($backend, $persist)
+	or die "Can't create $backend database\n";
+
+print "DSN: ", $db->dsn, "\n";
+print "Username: ", $db->username, "\n";
+print "Password: ", $db->password, "\n";
 
 my @prog = $db->client_program;
 
-if (@prog) { system @prog; }
-else { print "The $backend backend provides no client program\n"; }
+if (@prog) {
+	print "Client: ", join(' ', @prog), "\n";
+	system @prog if $client;
+} elsif ($client) {
+	print "The $backend backend provides no client program\n";
+}
 
-print "Removing temporary $backend server...\n";
+print "Removing temporary $backend database...\n" if !$persist && $verbose;
+
+__END__
+
+=head1 NAME
+
+tmpdb - Temporary database runner command line utility
+
+=head1 USAGE
+
+  tmpdb --list
+
+  tmpdb [--verbose] [--client] [--persist] <backend>
+
+=head1 OPTIONS
+
+=over
+
+=item --list
+
+List the available backends (database engines). One name per line. The program
+now supports MySQL and SQLite, but some of them may be not available on your
+system. You are welcome to add more backends.
+
+=item <backend>
+
+Backend (database engine) to use.
+
+=item --verbose
+
+Be verbose. Print some extra messages.
+
+=item --client
+
+Start a client program if the selected backend provides it.
+
+=item --persist
+
+Don't destroy the database when the program finishes. You can destroy it
+manually later.
+
+=back
+
+=head1 SEE ALSO
+
+DBIx::TmpDB(3pm)
+
+=head1 AUTHOR
+
+Alexander Lebedev E<lt>x-ander@alexplus.ruE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2016, 2017 by Alexandra Plus Ltd.
+
+This program is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=cut

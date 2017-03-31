@@ -3,16 +3,11 @@ use warnings;
 
 use DBI;
 
-use Test::More tests => 4;
+use Test::More tests => 2;
 
 BEGIN { use_ok 'DBIx::TmpDB', ':all'; }
 
 my @backends = tmpdb_backends;
+my $cnt = @backends;
 
-is scalar(@backends), 2, "There is two backends";
-
-my $db = tmpdb_new($backends[0]);
-ok $db, "First backend loaded";
-
-$db = tmpdb_new($backends[1]);
-ok $db, "Second backend loaded";
+ok $cnt > 0, "There are some backends ($cnt)";

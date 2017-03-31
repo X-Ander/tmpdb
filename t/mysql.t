@@ -5,28 +5,36 @@ use DBI;
 
 use Test::More tests => 10;
 
-BEGIN { use_ok 'DBIx::TmpDB::Backend::MySQL'; }
+BEGIN { use_ok 'DBIx::TmpDB', ':all'; }
 
-ok DBIx::TmpDB::Backend::MySQL::can_run, "Can run";
+SKIP: {
+	skip "MySQL backend can't run", 9
+		unless grep {$_ eq 'MySQL'} tmpdb_backends;
 
-my $db = new_ok 'DBIx::TmpDB::Backend::MySQL';
+	pass "MySQL backend can run";
 
-can_ok $db, qw/dsn username password/;
+	my $db = tmpdb_new 'MySQL';
+	ok $db, "MySQL backend is ready";
 
-like $db->dsn, qr{^DBI:mysql:mysql_socket=/[^:]+:database=test$}, "Good DSN";
+	can_ok $db, qw/dsn username password/;
 
-is $db->username, 'root', "Good username";
-is $db->password, '',     "Good password";
+	like $db->dsn, qr{^DBI:mysql:mysql_socket=[^:]+:database=test$}, "Good DSN";
 
-my $dbh = DBI->connect($db->dsn, $db->username, $db->password);
+	is $db->username, 'root', "Good username";
+	is $db->password, '',     "Good password";
 
-ok $dbh, "Connected";
+	my $dbh = DBI->connect($db->dsn, $db->username, $db->password);
 
-if ($dbh) {
-	$dbh->disconnect;
+	ok $dbh, "Connected";
+
+	if ($dbh) {
+		$dbh->disconnect;
+	}
+
+	my @cp = $db->client_program;
+
+	skip "MySQL client executable is not found", 2 unless @cp;
+
+	ok scalar(@cp) > 1, "Client program has arguments";
+	like $cp[0], qr/\bmysql\b/, "Good client program executable";
 }
-
-my @cp = $db->client_program;
-
-ok scalar(@cp) > 1, "Client program has arguments";
-like $cp[0], qr/\bmysql$/, "Good client program executable";

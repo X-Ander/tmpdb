@@ -5,4 +5,12 @@ use Test::More tests => 2;
 
 BEGIN { use_ok 'DBIx::TmpDB::Util', ':all'; }
 
-is find_program('ls'), '/bin/ls', "Found the 'ls' program"
+my $prog = 'perl';
+
+if ($^O =~ m/win/i) {
+	$prog = 'perl.exe';
+}
+
+my $path = find_program($prog);
+
+like $path, qr/\b$prog\b/, "Found the '$prog' program: $path";

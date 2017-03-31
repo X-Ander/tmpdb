@@ -5,28 +5,35 @@ use DBI;
 
 use Test::More tests => 10;
 
-BEGIN { use_ok 'DBIx::TmpDB::Backend::SQLite'; }
+BEGIN { use_ok 'DBIx::TmpDB', ':all'; }
 
-ok DBIx::TmpDB::Backend::SQLite::can_run, "Can run";
+SKIP: {
+	skip "SQLite backend can't run", 9
+		unless grep {$_ eq 'SQLite'} tmpdb_backends;
 
-my $db = new_ok 'DBIx::TmpDB::Backend::SQLite';
+	pass "SQLite backend can run";
 
-can_ok $db, qw/dsn username password/;
+	my $db = new_ok 'DBIx::TmpDB::Backend::SQLite';
 
-like $db->dsn, qr{^DBI:SQLite:dbname=/.*$}, "Good DSN";
+	can_ok $db, qw/dsn username password/;
 
-is $db->username, '', "Good username";
-is $db->password, '', "Good password";
+	like $db->dsn, qr{^DBI:SQLite:dbname=}, "Good DSN";
 
-my $dbh = DBI->connect($db->dsn, $db->username, $db->password);
+	is $db->username, '', "Good username";
+	is $db->password, '', "Good password";
 
-ok $dbh, "Connected";
+	my $dbh = DBI->connect($db->dsn, $db->username, $db->password);
 
-if ($dbh) {
-	$dbh->disconnect;
+	ok $dbh, "Connected";
+
+	if ($dbh) {
+		$dbh->disconnect;
+	}
+
+	my @cp = $db->client_program;
+
+	skip "SQLite executable is not found", 2 unless @cp;
+
+	ok scalar(@cp) > 1, "Client program has arguments";
+	like $cp[0], qr/\bsqlite3\b/, "Good client program executable";
 }
-
-my @cp = $db->client_program;
-
-ok scalar(@cp) > 1, "Client program has arguments";
-like $cp[0], qr/\bsqlite3$/, "Good client program executable";

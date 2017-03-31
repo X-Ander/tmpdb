@@ -7,12 +7,14 @@ use 5.010;
 
 use Carp;
 use File::Temp qw/tempdir/;
+use File::Spec::Functions;
 use DBI;
 
 use DBIx::TmpDB::Util qw/find_program/;
 
 sub can_run {
-	return defined find_program('sqlite3');
+	eval "require DBD::SQLite";
+	return !$@;
 }
 
 sub client_program { my ($self) = @_;
@@ -23,17 +25,19 @@ sub client_program { my ($self) = @_;
 		) : ();
 }
 
-sub new { my ($class) = @_;
+sub new { my ($class, $persist) = @_;
 	my $self = bless {}, $class;
 
-	$self->{prog} = find_program('sqlite3')
-		or croak "Can't find SQLite executable";
+	my @cleanup = $persist ? () : (CLEANUP => 1);
 
-	$self->{workdir} = tempdir('sqlite_test_XXXX', TMPDIR => 1, CLEANUP => 1);
-	$self->{database} = $self->{workdir} . "/db.sqlite";
+	$self->{prog} = find_program('sqlite3');
+	$self->{workdir} = tempdir('sqlite_test_XXXX', TMPDIR => 1, @cleanup);
+	$self->{database} = catfile $self->{workdir}, "db.sqlite";
 
 	return $self;
 }
+
+sub cleanup { }
 
 sub database { my ($self) = @_; return $self->{database}; }
 

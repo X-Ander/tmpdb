@@ -6,6 +6,7 @@ use warnings;
 use 5.010;
 
 use Carp;
+use File::Spec::Functions;
 use File::Temp qw/tempdir/;
 use DBI;
 
@@ -30,7 +31,7 @@ sub client_program { my ($self) = @_;
 		) : ();
 }
 
-sub new { my ($class) = @_;
+sub new { my ($class, $persist) = @_;
 	my $self = bless {}, $class;
 
 	for my $prog (qw/mysqld mysql_install_db/) {
@@ -46,11 +47,14 @@ sub new { my ($class) = @_;
 		}
 	}
 
-	$self->{workdir} = tempdir('mysql_test_XXXX', TMPDIR => 1, CLEANUP => 1);
-	$self->{datadir}    = $self->{workdir} . '/data';
-	$self->{tmpdir}     = $self->{workdir} . '/tmp';
-	$self->{'pid-file'} = $self->{workdir} . '/pid';
-	$self->{socket}     = $self->{workdir} . '/sock';
+	my @cleanup = $persist ? () : (CLEANUP => 1);
+
+	$self->{persist} = $persist;
+	$self->{workdir} = tempdir('mysql_test_XXXX', TMPDIR => 1, @cleanup);
+	$self->{datadir}    = catfile $self->{workdir}, 'data';
+	$self->{tmpdir}     = catfile $self->{workdir}, 'tmp';
+	$self->{'pid-file'} = catfile $self->{workdir}, 'pid';
+	$self->{socket}     = catfile $self->{workdir}, 'sock';
 
 	for my $dir ($self->{datadir}, $self->{tmpdir}) {
 		mkdir $dir, 0700 or croak "Can't create directory '$dir': $!";
@@ -73,7 +77,7 @@ sub new { my ($class) = @_;
 	croak "fork failed: $!" unless defined $pid;
 
 	unless ($pid) { # child process
-		my $log = $self->{workdir} . '/mysqld.log';
+		my $log = catfile $self->{workdir}, 'mysqld.log';
 		open my $fh, '>', $log or croak "Can't create log file '$log': $!";
 		open STDOUT, '>&', $fh or croak "Can't dup STDOUT: $!";
 		open STDERR, '>&', $fh or croak "Can't dup STDERR: $!";
@@ -103,7 +107,7 @@ sub new { my ($class) = @_;
 	return $self;
 }
 
-sub DESTROY { my ($self) = @_;
+sub cleanup { my ($self) = @_;
 	if ($self->{pid}) {
 		kill 'TERM', $self->{pid};
 
@@ -113,6 +117,12 @@ sub DESTROY { my ($self) = @_;
 			$sleep_cnt--;
 		}
 		croak "Looks like mysqld does not respond" if -f $self->{'pid-file'};
+	}
+}
+
+sub DESTROY { my ($self) = @_;
+	unless ($self->{persist}) {
+		$self->cleanup;
 	}
 }
 
