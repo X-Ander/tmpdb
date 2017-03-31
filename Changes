@@ -1,5 +1,11 @@
 Revision history for Perl extension DBIx::TmpDB.
 
+0.03  Fri Mar 31 14:12:00 2016
+	- Compatibility improvement. The program runs on Windows now
+	- Persistent databases option
+	- Better command line  options
+	- Documentation etc.
+
 0.02  Fri Sep 30 14:00:00 2016
 	- added the SQLite backend
 	- added '--list' option to the command-line utility 'tmpdb'
