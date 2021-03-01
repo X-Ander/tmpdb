@@ -29,9 +29,10 @@ SKIP: {
 
 	ok defined($dbh->do(
 		'CREATE TABLE test (foo INTEGER NOT NULL, bar VARCHAR(20) NOT NULL)'
-	));
+	)), "Create a table";
 
-	is $dbh->do("INSERT INTO test (foo, bar) VALUES (42, 'do not panic')"), 1;
+	is $dbh->do("INSERT INTO test (foo, bar) VALUES (42, 'do not panic')"), 1,
+		"Insert a row";
 
 	if ($dbh) {
 		$dbh->disconnect;
@@ -42,5 +43,5 @@ SKIP: {
 	skip "Pg client executable is not found", 2 unless @cp;
 
 	ok scalar(@cp) > 1, "Client program has arguments";
-	like $cp[0], qr/\bpg\b/, "Good client program executable";
+	like $cp[0], qr/\bpsql\b/, "Good client program executable";
 }

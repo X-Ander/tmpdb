@@ -10,17 +10,24 @@ use File::Spec::Functions;
 use File::Temp qw/tempdir/;
 use DBI;
 
-use DBIx::TmpDB::Util qw/find_program/;
+use DBIx::TmpDB::Util qw/find_program max_v/;
 
-my $binDir = '/usr/lib/postgresql/11/bin';
-my $initdbCmd = "$binDir/initdb";
-my $pgCmd = "$binDir/postgres";
+my $pgDir = catdir rootdir, qw/usr lib postgresql/;
+
+sub find_pg {
+	opendir my $dh, $pgDir or return ();
+	my $v = max_v(grep {
+			m/^\d+(\.\d+)*$/ && -d catdir($pgDir, $_, 'bin')
+		} readdir $dh);
+	closedir $dh;
+	$v eq '' ? () : (
+		catfile($pgDir, $v, 'bin', 'initdb'),
+		catfile($pgDir, $v, 'bin', 'postgres'))
+}
 
 sub can_run {
-	for my $prog ($initdbCmd, $pgCmd) {
-		return 0 unless -x $prog;
-	}
-	return 1;
+	my ($initdbCmd, $pgCmd) = find_pg or return 0;
+	-x $initdbCmd && -x $pgCmd
 }
 
 sub client_program { my ($self) = @_;
@@ -37,12 +44,10 @@ sub client_program { my ($self) = @_;
 sub new { my ($class, $persist) = @_;
 	my $self = bless {}, $class;
 
-	for my $prog ($initdbCmd, $pgCmd) {
-		-x $prog or croak "Can't find '$prog' executable";
-	}
+	my ($initdbCmd, $pgCmd) = find_pg or croak "Can't find Postgres programs";
+	-x or croak "'$_' is not executable" for ($initdbCmd, $pgCmd);
 
 	my @cleanup = $persist ? () : (CLEANUP => 1);
-	#my @cleanup = ();
 
 	$self->{persist} = $persist;
 	$self->{workdir} = tempdir('pg_test_XXXX', TMPDIR => 1, @cleanup);
