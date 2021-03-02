@@ -6,8 +6,10 @@ bin/tmpdb
 t/tmpdb.t
 t/util.t
 t/mysql.t
+t/pg.t
 t/sqlite.t
 lib/DBIx/TmpDB.pm
 lib/DBIx/TmpDB/Util.pm
 lib/DBIx/TmpDB/Backend/MySQL.pm
+lib/DBIx/TmpDB/Backend/Pg.pm
 lib/DBIx/TmpDB/Backend/SQLite.pm

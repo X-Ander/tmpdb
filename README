@@ -1,4 +1,4 @@
-DBIx::TmpDB version 0.03
+DBIx::TmpDB version 0.04
 ========================
 
 Temporary database runner
@@ -6,7 +6,8 @@ Temporary database runner
 This software is intended to use in unit tests mostly. It creates different
 temporary databases and automatically destroys them afterwards.
 
-MySQL and SQLite are supported now. You are welcome to add more backends.
+MySQL, Postgres and SQLite are supported now. You are welcome to add more
+backends.
 
 INSTALLATION
 
@@ -36,7 +37,7 @@ Alexander Lebedev <x-ander@alexplus.ru>
 
 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016, 2017 by Alexandra Plus Ltd.
+Copyright (C) 2016, 2017, 2021 by Alexandra Plus Ltd.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

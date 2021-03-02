@@ -1,7 +1,7 @@
 ---
 name: DBIx-TmpDB
 abstract: 'Temporary database runner'
-version: 0.03
+version: 0.04
 author:
   - 'Alexander Lebedev <x-ander@alexplus.ru>'
 license: perl

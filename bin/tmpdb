@@ -7,6 +7,7 @@ use FindBin;
 use lib "$FindBin::Bin/../lib";
 
 use Getopt::Long;
+use Pod::Usage;
 
 use DBIx::TmpDB qw/tmpdb_backends tmpdb_new/;
 
@@ -14,13 +15,19 @@ my $list;
 my $persist;
 my $verbose;
 my $client;
+my $help;
 
 GetOptions
 	( '--list'    => \$list
 	, '--persist' => \$persist
 	, '--verbose' => \$verbose
 	, '--client'  => \$client
+	, '--help'    => \$help
 	);
+
+if ($help) {
+	pod2usage(0);
+}
 
 if ($list) {
 	print join("\n", tmpdb_backends), "\n";
@@ -90,6 +97,10 @@ Start a client program if the selected backend provides it.
 Don't destroy the database when the program finishes. You can destroy it
 manually later.
 
+=item --help
+
+Show the program manual.
+
 =back
 
 =head1 SEE ALSO
@@ -102,7 +113,7 @@ Alexander Lebedev E<lt>x-ander@alexplus.ruE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016, 2017 by Alexandra Plus Ltd.
+Copyright (C) 2016, 2017, 2021 by Alexandra Plus Ltd.
 
 This program is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.

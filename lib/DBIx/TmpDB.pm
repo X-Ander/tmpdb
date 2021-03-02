@@ -12,7 +12,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw/tmpdb_backends tmpdb_new/;
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 my $backend_pkg_root = __PACKAGE__ . "::Backend";
 
@@ -94,7 +94,8 @@ DBIx::TmpDB - Temporary database runner
 This module creates and destroys temporary databases. It runs, if nessesary,
 temporary instanses of the database servers.
 
-MySQL and SQLite are supported now. You are welcome to add more backends.
+MySQL, Postgres and SQLite are supported now. You are welcome to add more
+backends.
 
 =over
 
@@ -116,7 +117,7 @@ Alexander Lebedev E<lt>x-ander@alexplus.ruE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2016, 2017 by Alexandra Plus Ltd.
+Copyright (C) 2016, 2017, 2021 by Alexandra Plus Ltd.
 
 This library is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
