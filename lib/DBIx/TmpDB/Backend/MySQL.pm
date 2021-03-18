@@ -8,6 +8,7 @@ use 5.010;
 use Carp;
 use File::Spec::Functions;
 use File::Temp qw/tempdir/;
+use File::Path qw/remove_tree/;
 use DBI;
 
 use DBIx::TmpDB::Util qw/find_program/;
@@ -31,7 +32,7 @@ sub client_program { my ($self) = @_;
 		) : ();
 }
 
-sub new { my ($class, $persist) = @_;
+sub new { my ($class, $persist, $workdir) = @_;
 	my $self = bless {}, $class;
 
 	for my $prog (qw/mysqld mysql_install_db/) {
@@ -50,7 +51,13 @@ sub new { my ($class, $persist) = @_;
 	my @cleanup = $persist ? () : (CLEANUP => 1);
 
 	$self->{persist} = $persist;
-	$self->{workdir} = tempdir('mysql_test_XXXX', TMPDIR => 1, @cleanup);
+	if ($workdir) {
+		$self->{workdir} = $workdir;
+		$self->{tempdir} = 0;
+	} else {
+		$self->{workdir} = tempdir('mysql_test_XXXX', TMPDIR => 1, @cleanup);
+		$self->{tempdir} = 1;
+	}
 	$self->{datadir}    = catfile $self->{workdir}, 'data';
 	$self->{tmpdir}     = catfile $self->{workdir}, 'tmp';
 	$self->{'pid-file'} = catfile $self->{workdir}, 'pid';
@@ -117,6 +124,10 @@ sub cleanup { my ($self) = @_;
 			$sleep_cnt--;
 		}
 		croak "Looks like mysqld does not respond" if -f $self->{'pid-file'};
+	}
+	unless ($self->{tempdir} || $self->{persist}) {
+		remove_tree $self->{tmpdir}  if -d $self->{tmpdir};
+		remove_tree $self->{datadir} if -d $self->{datadir};
 	}
 }
 

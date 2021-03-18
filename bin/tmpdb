@@ -15,14 +15,16 @@ my $list;
 my $persist;
 my $verbose;
 my $client;
+my $workdir;
 my $help;
 
 GetOptions
-	( '--list'    => \$list
-	, '--persist' => \$persist
-	, '--verbose' => \$verbose
-	, '--client'  => \$client
-	, '--help'    => \$help
+	( 'list'      => \$list
+	, 'persist'   => \$persist
+	, 'verbose'   => \$verbose
+	, 'client'    => \$client
+	, 'workdir=s' => \$workdir
+	, 'help'      => \$help
 	);
 
 if ($help) {
@@ -40,7 +42,7 @@ die "No backend specified\n" unless $backend;
 
 print "Creating temporary $backend database...\n" if $verbose;
 
-my $db = tmpdb_new($backend, $persist)
+my $db = tmpdb_new($backend, $persist, $workdir)
 	or die "Can't create $backend database\n";
 
 print "DSN: ", $db->dsn, "\n";
@@ -96,6 +98,12 @@ Start a client program if the selected backend provides it.
 
 Don't destroy the database when the program finishes. You can destroy it
 manually later.
+
+=item --workdir
+
+(for backends it is applicable to) Use this directory to place temporary
+database files. If not specified the program creates a random temporary
+directory.
 
 =item --help
 

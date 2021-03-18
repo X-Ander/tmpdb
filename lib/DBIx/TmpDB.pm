@@ -12,7 +12,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw/tmpdb_backends tmpdb_new/;
 our %EXPORT_TAGS = (all => \@EXPORT_OK);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 my $backend_pkg_root = __PACKAGE__ . "::Backend";
 
@@ -48,16 +48,10 @@ sub tmpdb_backends {
 	} keys %pm_hash;
 }
 
-sub tmpdb_new { my ($backend, $persist) = @_;
+sub tmpdb_new { my ($backend, $persist, $workdir) = @_;
 	my $pkg = $backend_pkg_root . "::$backend";
 	eval "require $pkg";
-	if ($persist) {
-		$persist =~ s/'/\\'/g;
-		$persist = "'$persist'";
-	} else {
-		$persist = '';
-	}
-	return $@ ? undef : eval $pkg . "->new($persist)";
+	return $@ ? undef : eval{ $pkg->new($persist, $workdir) };
 }
 
 1;
@@ -103,11 +97,12 @@ backends.
 
 Returns a list of available backend names.
 
-=item $db = tmpdb_new <backend> [, <perist>]
+=item $db = tmpdb_new <backend> [, <persist>[, <workdir>]]
 
 Creates the database by the backend name, and returns its object reference.
 The database will be destroyed when the object goes out of scope unless the
-persist argument has true value.
+persist argument has true value. If workdir argument is specified then that
+directory will be used instead of creating the temporary one.
 
 =back
 

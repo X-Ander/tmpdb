@@ -8,6 +8,7 @@ use 5.010;
 use Carp;
 use File::Spec::Functions;
 use File::Temp qw/tempdir/;
+use File::Path qw/remove_tree/;
 use DBI;
 
 use DBIx::TmpDB::Util qw/find_program max_v/;
@@ -41,7 +42,7 @@ sub client_program { my ($self) = @_;
 		) : ();
 }
 
-sub new { my ($class, $persist) = @_;
+sub new { my ($class, $persist, $workdir) = @_;
 	my $self = bless {}, $class;
 
 	my ($initdbCmd, $pgCmd) = find_pg or croak "Can't find Postgres programs";
@@ -50,10 +51,17 @@ sub new { my ($class, $persist) = @_;
 	my @cleanup = $persist ? () : (CLEANUP => 1);
 
 	$self->{persist} = $persist;
-	$self->{workdir} = tempdir('pg_test_XXXX', TMPDIR => 1, @cleanup);
+	if ($workdir) {
+		$self->{workdir} = $workdir;
+		$self->{tempdir} = 0;
+	} else {
+		$self->{workdir} = tempdir('pg_test_XXXX', TMPDIR => 1, @cleanup);
+		$self->{tempdir} = 1;
+	}
 	$self->{datadir}    = catfile $self->{workdir}, 'data';
 	$self->{socketdir}  = catfile $self->{workdir}, 'sock';
 	$self->{pidfile}    = catfile $self->{workdir}, 'pid';
+	$self->{logfile}    = catfile $self->{workdir}, 'postgres.log';
 
 	for my $dir ($self->{datadir}, $self->{socketdir}) {
 		mkdir $dir, 0700 or croak "Can't create directory '$dir': $!";
@@ -68,7 +76,7 @@ sub new { my ($class, $persist) = @_;
 	croak "fork failed: $!" unless defined $pid;
 
 	unless ($pid) { # child process
-		my $log = catfile $self->{workdir}, 'postgres.log';
+		my $log = $self->{logfile};
 		open my $fh, '>', $log or croak "Can't create log file '$log': $!";
 		open STDOUT, '>&', $fh or croak "Can't dup STDOUT: $!";
 		open STDERR, '>&', $fh or croak "Can't dup STDERR: $!";
@@ -108,6 +116,11 @@ sub cleanup { my ($self) = @_;
 			$sleep_cnt--;
 		}
 		croak "Looks like postgres does not respond" if -f $self->{pidfile};
+	}
+	unless ($self->{tempdir} || $self->{persist}) {
+		remove_tree $self->{socketdir} if -d $self->{socketdir};
+		remove_tree $self->{datadir}   if -d $self->{datadir};
+		unlink $self->{logfile} if -f $self->{logfile};
 	}
 }
 

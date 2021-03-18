@@ -1,5 +1,8 @@
 Revision history for Perl extension DBIx::TmpDB.
 
+0.05  Thu Mar 18 09:38:24 2021
+	- '--workdir' option
+
 0.04  Mon Mar 1 13:48:00 2021
 	- Added the Postgres backend
 
