@@ -108,7 +108,7 @@ directory will be used instead of creating the temporary one.
 
 =head1 AUTHOR
 
-Alexander Lebedev E<lt>x-ander@alexplus.ruE<gt>
+Alexander Lebedev <x-ander@alexplus.ru>
 
 =head1 COPYRIGHT AND LICENSE
 
