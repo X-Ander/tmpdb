@@ -16,7 +16,7 @@ fi
 export DEBFULLNAME
 export DEBEMAIL
 
-WORKDIR='/tmp/build-deb'
+WORKDIR='build-deb'
 [ -d "$WORKDIR" ] || mkdir "$WORKDIR" || exit 1
 
 MAIN_PM='lib/DBIx/TmpDB.pm'
